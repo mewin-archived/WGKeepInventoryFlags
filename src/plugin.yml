@@ -1,0 +1,6 @@
+name: WGKeepInventoryFlags
+version: 0.1
+authors: [ mewin ]
+main: com.mewin.WGKeepInvFlag.WGKeepInventoryFlagPlugin
+depend: [ WorldGuard, WGCustomFlags ]
+softdepend: [ WorldEdit ]
