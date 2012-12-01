@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 public class WGKIFlagListener implements Listener {
     private WorldGuardPlugin wgPlugin;
     private WGKeepInventoryFlagsPlugin plugin;
-    public Map<String, ItemStack[]> inventories;
+    public Map<String, ItemStack[]> inventories, armors;
     
     public WGKIFlagListener(WGKeepInventoryFlagsPlugin plugin, WorldGuardPlugin wgPlugin)
     {
@@ -23,6 +23,7 @@ public class WGKIFlagListener implements Listener {
         this.wgPlugin = wgPlugin;
         
         this.inventories = new HashMap<String, ItemStack[]>();
+        this.armors = new HashMap<String, ItemStack[]>();
         
         plugin.loadInventories(inventories);
     }
@@ -33,6 +34,7 @@ public class WGKIFlagListener implements Listener {
         if(wgPlugin.getGlobalRegionManager().allows(WGKeepInventoryFlagsPlugin.KEEP_INVENTORY_FLAG, e.getEntity().getLocation(), wgPlugin.wrapPlayer(e.getEntity())))
         {
             inventories.put(e.getEntity().getName(), e.getEntity().getInventory().getContents());
+            armors.put(e.getEntity().getName(), e.getEntity().getInventory().getArmorContents());
             e.getDrops().clear();
         }
         
@@ -49,6 +51,11 @@ public class WGKIFlagListener implements Listener {
         if (inventories.containsKey(e.getPlayer().getName()))
         {
             e.getPlayer().getInventory().setContents(inventories.remove(e.getPlayer().getName()));
+        }
+        
+        if (armors.containsKey(e.getPlayer().getName()))
+        {
+            e.getPlayer().getInventory().setArmorContents(armors.remove(e.getPlayer().getName()));
         }
     }
 }
