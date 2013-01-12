@@ -18,16 +18,12 @@
 package com.mewin.WGKeepInvFlags;
 
 import com.mewin.WGCustomFlags.WGCustomFlagsPlugin;
-import com.mewin.util.ConfigMgr;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.RegionGroup;
 import com.sk89q.worldguard.protection.flags.StateFlag;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.inventory.ItemStack;
+import de.mewin.util.ValueSaver;
+import java.io.File;
+import java.util.logging.Level;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -36,13 +32,13 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author mewin<mewin001@hotmail.de>
  */
 public class WGKeepInventoryFlagsPlugin extends JavaPlugin {
-    public static final StateFlag KEEP_INVENTORY_FLAG = new StateFlag("keep-inventory", false);
-    public static final StateFlag KEEP_LEVEL_FLAG = new StateFlag("keep-level", false);
+    public static final StateFlag KEEP_INVENTORY_FLAG = new StateFlag("keep-inventory", false, RegionGroup.ALL);
+    public static final StateFlag KEEP_LEVEL_FLAG = new StateFlag("keep-level", false, RegionGroup.ALL);
     
     private WGCustomFlagsPlugin custPlugin;
     private WorldGuardPlugin wgPlugin;
     private WGKIFlagListener listener;
-    private FileConfiguration invConf;
+    private ValueSaver saver;
     
     @Override
     public void onEnable()
@@ -75,87 +71,41 @@ public class WGKeepInventoryFlagsPlugin extends JavaPlugin {
         
         custPlugin.addCustomFlag(KEEP_INVENTORY_FLAG);
         custPlugin.addCustomFlag(KEEP_LEVEL_FLAG);
-        invConf = new YamlConfiguration();
         
         listener = new WGKIFlagListener(this, wgPlugin);
+        saver = new ValueSaver(listener, new File(this.getDataFolder(), "inventories.yml"));
         
+        loadInventories();
         getServer().getPluginManager().registerEvents(listener, this);
     }
     
     @Override
     public void onDisable()
     {
-        saveInventories(listener.inventories);
+        saveInventories();
     }
     
-    public void saveInventories(Map<String, ItemStack[]> invs)
+    public void saveInventories()
     {
-        ConfigMgr mgr = new ConfigMgr(this, "inventories.yml", invConf);
-        
-        for(Entry<String, ItemStack[]> entry : invs.entrySet())
+        try
         {
-            List<Map> list = isArrayToList(entry.getValue());
-            String player = entry.getKey();
-            
-            invConf.set(player, list);
+            saver.save();
         }
-        
-        mgr.save();
-    }
-    
-    public void loadInventories(Map<String, ItemStack[]> invs)
-    {
-        ConfigMgr mgr = new ConfigMgr(this, "inventories.yml", invConf);
-        
-        mgr.load(false);
-        
-        Map<String, Object> values = invConf.getValues(false);
-        
-        for(Entry<String, Object> value : values.entrySet())
+        catch(Exception ex)
         {
-            if (value.getValue() instanceof List)
-            {
-                List<Map> list = (List<Map>) value.getValue();
-                
-                invs.put(value.getKey(), listToIsArray(list, 36));
-            }
+            getLogger().log(Level.WARNING, "Could not save inventories: ", ex);
         }
     }
     
-    private List<Map> isArrayToList(ItemStack[] isArray)
+    public void loadInventories()
     {
-        List list = new ArrayList<Map>();
-        
-        for(int i = 0; i < isArray.length; i++)
+        try
         {
-            ItemStack is = isArray[i];
-            
-            if (is != null && is.getTypeId() != 0)
-            {
-                Map<String, Object> map = is.serialize();
-                map.put("slot", i);
-                
-                list.add(map);
-            }
+            saver.load();
         }
-        
-        return list;
-    }
-    
-    private ItemStack[] listToIsArray(List<Map> list, int invSize)
-    {
-        ItemStack[] iss = new ItemStack[invSize];
-        
-        for(int i = 0; i < invSize; i++)
+        catch(Exception ex)
         {
-            iss[i] = new ItemStack(0, 0);
+            getLogger().log(Level.WARNING, "Could not load inventories: ", ex);
         }
-        
-        for(Map map : list)
-        {
-            iss[(Integer) map.remove("slot")] = ItemStack.deserialize(map);
-        }
-        
-        return iss;
     }
 }

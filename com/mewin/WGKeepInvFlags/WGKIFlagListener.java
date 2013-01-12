@@ -18,6 +18,7 @@
 package com.mewin.WGKeepInvFlags;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import de.mewin.util.SavingValue;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.event.EventHandler;
@@ -32,6 +33,7 @@ import org.bukkit.inventory.ItemStack;
 public class WGKIFlagListener implements Listener {
     private WorldGuardPlugin wgPlugin;
     private WGKeepInventoryFlagsPlugin plugin;
+    @SavingValue
     public Map<String, ItemStack[]> inventories, armors;
     
     public WGKIFlagListener(WGKeepInventoryFlagsPlugin plugin, WorldGuardPlugin wgPlugin)
@@ -42,7 +44,7 @@ public class WGKIFlagListener implements Listener {
         this.inventories = new HashMap<String, ItemStack[]>();
         this.armors = new HashMap<String, ItemStack[]>();
         
-        plugin.loadInventories(inventories);
+        plugin.loadInventories();
     }
     
     @EventHandler
