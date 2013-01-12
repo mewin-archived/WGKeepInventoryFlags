@@ -73,7 +73,6 @@ public class WGKeepInventoryFlagsPlugin extends JavaPlugin {
         custPlugin.addCustomFlag(KEEP_LEVEL_FLAG);
         
         listener = new WGKIFlagListener(this, wgPlugin);
-        saver = new ValueSaver(listener, new File(this.getDataFolder(), "inventories.yml"));
         
         loadInventories();
         getServer().getPluginManager().registerEvents(listener, this);
@@ -101,6 +100,10 @@ public class WGKeepInventoryFlagsPlugin extends JavaPlugin {
     {
         try
         {
+            if (saver == null)
+            {
+                saver = new ValueSaver(listener, new File(this.getDataFolder(), "inventories.yml"));
+            }
             saver.load();
         }
         catch(Exception ex)

@@ -43,8 +43,6 @@ public class WGKIFlagListener implements Listener {
         
         this.inventories = new HashMap<String, ItemStack[]>();
         this.armors = new HashMap<String, ItemStack[]>();
-        
-        plugin.loadInventories();
     }
     
     @EventHandler
