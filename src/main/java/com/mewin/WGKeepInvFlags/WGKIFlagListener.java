@@ -50,8 +50,13 @@ public class WGKIFlagListener implements Listener {
     {
         if(wgPlugin.getGlobalRegionManager().allows(WGKeepInventoryFlagsPlugin.KEEP_INVENTORY_FLAG, e.getEntity().getLocation(), wgPlugin.wrapPlayer(e.getEntity())))
         {
-            inventories.put(e.getEntity().getName(), e.getEntity().getInventory().getContents());
-            armors.put(e.getEntity().getName(), e.getEntity().getInventory().getArmorContents());
+            // Prevent overwriting inventories in the case of a duplicate death message
+            if (!inventories.containsKey(e.getEntity().getName())) {
+                inventories.put(e.getEntity().getName(), e.getEntity().getInventory().getContents());
+            }
+            if (!armors.containsKey(e.getEntity().getName())) {
+                armors.put(e.getEntity().getName(), e.getEntity().getInventory().getArmorContents());
+            }
             e.getDrops().clear();
         }
         
